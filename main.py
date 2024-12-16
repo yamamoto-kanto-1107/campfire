@@ -47,6 +47,7 @@ radioBtn2.grid(row=2, column=0, padx=5, pady=5)
 # ページ開始エントリ
 getCompanyCountStart = StringVar()
 getCompanyCountStart_txt = ttk.Entry(frame1, textvariable=getCompanyCountStart, width=10)
+getCompanyCountStart_txt.insert(0,1)
 getCompanyCountStart_txt.grid(row=1, column=1, padx=5, pady=5)
 
 # セパレーター

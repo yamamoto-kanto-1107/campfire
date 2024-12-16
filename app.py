@@ -9,11 +9,11 @@ import csv
 
 
 def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all = None):
+
     if company_start == None:
         company_start= 1
 
-    url = f'https://camp-fire.jp/projects/search?page={company_start}'
-    # url = f'https://camp-fire.jp/projects/search?page=1'
+    url = f'https://camp-fire.jp/projects/search?project_status=closed&page={company_start}'
 
     driver= webdriver.Chrome()
     driver.get(url)
@@ -26,54 +26,38 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
     address_arr=[]
     phone_arr=[]
     name_arr=[]
+    url_arr=[]
 
-    # company_elements = driver.find_element(By.TAG_NAME,'ol')
-    # company_element_li = company_elements.find_elements(By.TAG_NAME,'li')
-
-    # company_element_btn =company_element_li[0].find_elements(By.CLASS_NAME,'card')
-    # company_element_btn[0].click()
-    # identify_btn = driver.find_element(By.CLASS_NAME,'sct-button')
-    # identify_btn.click()
-    # define = driver.find_element(By.CLASS_NAME,'definitions')
-    # company = define.find_elements(By.CLASS_NAME,'description')
-    # company_arr.append(company[0].text)
-    # print(company_arr)
-    # page = company_start
-    company_end = 1
     page=1
+    count = 0
     while True:
         try:
             # 最新の `ol` 要素を取得
-            company_elements = driver.find_element(By.TAG_NAME, 'ol')
+            container = driver.find_element(By.CLASS_NAME,'container')
+            company_elements = container.find_element(By.TAG_NAME, 'ol')
 
             # `li` 要素を取得
             company_element_li = company_elements.find_elements(By.TAG_NAME, 'li')
-            total_items = len(company_element_li)
 
-            for i in range(total_items):
-                print(f'{i}個目')
+            # for i in range(len(company_element_li)):
+            for i in range(1):
+                count +=1
                 try:
-                    # 最新の `li` 要素を再取得
-                    company_elements = driver.find_element(By.TAG_NAME, 'ol')
-                    company_element_li = company_elements.find_elements(By.TAG_NAME, 'li')
-
-                    # `i` 番目の `li` 要素を取得
-                    li = company_element_li[i]
-
                     # `card` 要素を取得しクリック
-                    company_element_btn = li.find_element(By.CLASS_NAME, 'card')
+                    container = driver.find_element(By.CLASS_NAME,'container')
+                    company_elements = container.find_element(By.TAG_NAME, 'ol')
+
+                    # `li` 要素を取得
+                    company_element_li = company_elements.find_elements(By.TAG_NAME, 'li')
+                    company_element_btn = company_element_li[i].find_element(By.CLASS_NAME, 'card')
                     company_element_btn.click()
 
                     # 識別ボタンをクリック
-                    identify_btn = WebDriverWait(driver, 20).until(
-                        EC.element_to_be_clickable((By.ID, 'gtm-sct-button'))
-                    )
+                    identify_btn = driver.find_element(By.ID,'gtm-sct-button')
                     identify_btn.click()
 
                     # 定義部分を取得
-                    define = WebDriverWait(driver, 20).until(
-                        EC.presence_of_element_located((By.CLASS_NAME, 'definitions'))
-                    )
+                    define =driver.find_element(By.CLASS_NAME,'definitions')
                     all = define.find_elements(By.CLASS_NAME, 'description')
                     if all[0].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
                         close_btn = driver.find_element(By.CLASS_NAME,'close')
@@ -81,6 +65,7 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                         driver.back()
                         continue
                     else:
+                        print(all[0].text)
                         company_arr.append(all[0].text)
 
                     if all[2].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
@@ -107,39 +92,38 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                     else:
                         name_arr.append(all[1].text)
 
-                    close_btn = driver.find_element(By.CLASS_NAME,'close')
-                    close_btn.click()
+                    current_url = driver.current_url
+                    url_arr.append(current_url)
+
                     driver.back()
 
                 except Exception as e:
-                    print(f"Error during interaction with item {i}: {e}")
-                    driver.back()
+                    print(f"Error during interaction with item {e}")
+
         except Exception as e:
             print(f"Error retrieving DOM: {e}")
-
-
-
-        print(f'name::{name_arr}')
-        print(f'phone::{phone_arr}')
-        print(f'address::{address_arr}')
-        print(f'company::{company_arr}')
 
         try:
             if page == company_end and company_all != True:
                 break
 
+            print(page)
             page += 1
             next_project_btn = driver.find_element(By.CLASS_NAME,'next')
             next_project_btn.click()
         except:
             break
 
-    insert_arr = zip(company_arr,name_arr,phone_arr,address_arr)
+    print(f'name::{name_arr}')
+    print(f'phone::{phone_arr}')
+    print(f'address::{address_arr}')
+    print(f'company::{company_arr}')
+
+    insert_arr = zip(company_arr,name_arr,phone_arr,address_arr,url_arr)
 
     with open(f'{csv_pass}/output.csv','w', newline='') as file:
         writer = csv.writer(file)
 
-        writer.writerow(['会社名','代表者名','電話番号','住所'])
+        writer.writerow(['会社名','代表者名','電話番号','住所','URL'])
         for row in insert_arr:
             writer.writerow(row)
-
