@@ -8,77 +8,125 @@ import time
 import csv
 
 
-def getDataToCampfire(mailaddress,password,csv_pass,company_count):
-    url = 'https://camp-fire.jp/'
-    wait_time = 5
+def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all = None):
+    if company_start == None:
+        company_start= 1
 
-    print(company_count)
-    print(csv_pass)
+    url = f'https://camp-fire.jp/projects/search?page={company_start}'
+    # url = f'https://camp-fire.jp/projects/search?page=1'
+
     driver= webdriver.Chrome()
     driver.get(url)
+    driver.set_page_load_timeout(240)
+    driver.set_script_timeout(120)
+    driver.implicitly_wait(30)
 
-    #ログインボタンのクリック
-    login_btn = driver.find_element(By.ID, 'gtm-hnav-link-to-login')
-    login_btn.click()
+    #データを取得する
+    company_arr=[]
+    address_arr=[]
+    phone_arr=[]
+    name_arr=[]
 
-    #メールアドレスの挿入
-    mail_input = driver.find_element(By.CLASS_NAME,'form-control')
-    mail_input.send_keys(mailaddress)
+    # company_elements = driver.find_element(By.TAG_NAME,'ol')
+    # company_element_li = company_elements.find_elements(By.TAG_NAME,'li')
 
-    #次へボタンをクリック
-    next_btn = driver.find_element(By.NAME,'commit')
-    next_btn.click()
-
-    #パスワードを入力
-    pass_input = driver.find_element(By.ID,'user_password')
-    pass_input.send_keys(password)
-
-    #ログインボタンをクリック
-    login_btn2 = driver.find_element(By.NAME,'commit')
-    login_btn2.click()
-
-    #プロジェクトを探す
-    search_project_btn = driver.find_element(By.ID,'gtm-hnav-link-to-projects-pc')
-    search_project_btn.click()
-
-
-    #企業の名前を取得する
-    company_names = []
-    page = 1
-    count = 0
+    # company_element_btn =company_element_li[0].find_elements(By.CLASS_NAME,'card')
+    # company_element_btn[0].click()
+    # identify_btn = driver.find_element(By.CLASS_NAME,'sct-button')
+    # identify_btn.click()
+    # define = driver.find_element(By.CLASS_NAME,'definitions')
+    # company = define.find_elements(By.CLASS_NAME,'description')
+    # company_arr.append(company[0].text)
+    # print(company_arr)
+    # page = company_start
+    company_end = 1
+    page=1
     while True:
-        company_elements = driver.find_element(By.TAG_NAME,'ol')
-        company_element_li = company_elements.find_elements(By.TAG_NAME,'li')
+        try:
+            # 最新の `ol` 要素を取得
+            company_elements = driver.find_element(By.TAG_NAME, 'ol')
 
-        for li in company_element_li:
-            company_element_text = li.find_elements(By.CLASS_NAME,'text')
-            company_names.append(company_element_text[1].text)
+            # `li` 要素を取得
+            company_element_li = company_elements.find_elements(By.TAG_NAME, 'li')
+            total_items = len(company_element_li)
 
-            count +=1
-            print(count)
-            if count == company_count:
-                print('call?')
+            for i in range(total_items):
+                print(f'{i}個目')
+                try:
+                    # 最新の `li` 要素を再取得
+                    company_elements = driver.find_element(By.TAG_NAME, 'ol')
+                    company_element_li = company_elements.find_elements(By.TAG_NAME, 'li')
+
+                    # `i` 番目の `li` 要素を取得
+                    li = company_element_li[i]
+
+                    # `card` 要素を取得しクリック
+                    company_element_btn = li.find_element(By.CLASS_NAME, 'card')
+                    company_element_btn.click()
+
+                    # 識別ボタンをクリック
+                    identify_btn = WebDriverWait(driver, 20).until(
+                        EC.element_to_be_clickable((By.ID, 'gtm-sct-button'))
+                    )
+                    identify_btn.click()
+
+                    # 定義部分を取得
+                    define = WebDriverWait(driver, 20).until(
+                        EC.presence_of_element_located((By.CLASS_NAME, 'definitions'))
+                    )
+                    all = define.find_elements(By.CLASS_NAME, 'description')
+                    if all[0].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
+                        company_arr.append('-')
+                    else:
+                        company_arr.append(all[0].text)
+
+                    if all[2].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
+                        address_arr.append('-')
+                    else:
+                        address_arr.append(all[2].text)
+
+                    if all[3].text ==  '無し':
+                        phone_arr.append('-')
+                    else:
+                        phone_arr.append(all[3].text)
+
+                    if all[1].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
+                        name_arr.append('-')
+                    else:
+                        name_arr.append(all[1].text)
+
+                    close_btn = driver.find_element(By.CLASS_NAME,'close')
+                    close_btn.click()
+                    driver.back()
+
+                except Exception as e:
+                    print(f"Error during interaction with item {i}: {e}")
+        except Exception as e:
+            print(f"Error retrieving DOM: {e}")
+
+
+
+        print(f'name::{name_arr}')
+        print(f'phone::{phone_arr}')
+        print(f'address::{address_arr}')
+        print(f'company::{company_arr}')
+
+        try:
+            if page == company_end and company_all != True:
                 break
 
-        if count == company_count:
-            print('call?')
-            break
-
-        print(f'call{page}')
-        try:
             page += 1
             next_project_btn = driver.find_element(By.CLASS_NAME,'next')
             next_project_btn.click()
         except:
             break
 
-    print('call3')
+    insert_arr = zip(company_arr,name_arr,phone_arr,address_arr)
+
     with open(f'{csv_pass}/output.csv','w', newline='') as file:
         writer = csv.writer(file)
 
-        writer.writerow(['会社名'])
-        for company_name in company_names:
-            writer.writerow([company_name])
+        writer.writerow(['会社名','代表者名','電話番号','住所'])
+        for row in insert_arr:
+            writer.writerow(row)
 
-
-    time.sleep(wait_time)

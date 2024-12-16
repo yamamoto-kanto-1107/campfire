@@ -3,98 +3,80 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 import app
-import os,sys
+import os
 
 
 # ウィンドウを作成
 root = Tk()
-
-# ウィンドウサイズを指定
-root.geometry("420x340")
-
-# ウィンドウタイトルを指定
+root.geometry("620x340")
 root.title('入力フォーム')
+
+# カラム幅を調整
+root.grid_columnconfigure(1, minsize=10)
+root.grid_columnconfigure(2, minsize=10)
+root.grid_columnconfigure(3, minsize=10)
 
 frame1 = ttk.Frame(root, padding=(32))
 frame1.grid()
 
-# メールアドレス
-label1 = ttk.Label(frame1, text='メールアドレス', padding=(5, 2))
-label1.grid(row=0, column=0, sticky=E)
-
-# パスワード
-label2 = ttk.Label(frame1, text='パスワード', padding=(5, 2))
-label2.grid(row=1, column=0, sticky=E)
-
 # CSV出力先
-label3 = ttk.Label(frame1, text='CSV出力先', padding=(5, 2))
-label3.grid(row=2, column=0, sticky=E)
+label3 = ttk.Label(frame1, text='CSV出力先', width=10)
+label3.grid(row=0, column=0, sticky=E, padx=5, pady=5)
 
-
-
-# 取得企業数
-label3 = ttk.Label(frame1, text='取得企業数', padding=(5, 2))
-label3.grid(row=3, column=0, sticky=E)
-
-# メールアドレス
-mailRow = StringVar()
-mailRow_txt = ttk.Entry(
-    frame1,
-    textvariable=mailRow,
-    width=20)
-mailRow_txt.grid(row=0, column=1)
-
-# パスワード
-passwordRow = StringVar()
-passwordRow_txt = ttk.Entry(
-    frame1,
-    textvariable=passwordRow,
-    width=20)
-passwordRow_txt.grid(row=1, column=1)
-
-# csv出力先
+# CSV出力先エントリ
 OutputCSV = StringVar()
-OutputCSV_txt = ttk.Entry(
-    frame1,
-    textvariable=OutputCSV,
-    width=20)
-OutputCSV_txt.grid(row=2, column=1)
+OutputCSV_txt = ttk.Entry(frame1, textvariable=OutputCSV, width=10)
+OutputCSV_txt.grid(row=0, column=1, padx=5, pady=5)
 
-# 取得企業数
-getCompanyCount = StringVar()
-getCompanyCount_txt = ttk.Entry(
-    frame1,
-    textvariable=getCompanyCount,
-    width=20)
-getCompanyCount_txt.grid(row=3, column=1)
-
+# CSV参照ボタン
 def dirdialog_clicked():
     iDir = os.path.abspath(os.path.dirname(__file__))
-    iDirPath = filedialog.askdirectory(initialdir = iDir)
+    iDirPath = filedialog.askdirectory(initialdir=iDir)
     OutputCSV.set(iDirPath)
 
-def btn_click():
-    # 値の取得
-    mail_value = str(mailRow.get())
-    pass_value = str(passwordRow.get())
-    csv_value = str(OutputCSV.get())
-    company_value = int(getCompanyCount.get())
-
-    app.getDataToCampfire(mail_value,pass_value,csv_value,company_value)
-
-
 IDirButton = ttk.Button(frame1, text="参照", command=dirdialog_clicked)
-IDirButton.grid(row=2, column=2)
+IDirButton.grid(row=0, column=3, padx=5, pady=5)
+
+# 取得企業数
+radioSelect = StringVar()
+radioBtn = ttk.Radiobutton(frame1, text='ページ指定', variable=radioSelect, value='A', width=10)
+radioBtn2 = ttk.Radiobutton(frame1, text='全て', variable=radioSelect, value='B', width=10)
+radioBtn.grid(row=1, column=0, padx=5, pady=5)
+radioBtn2.grid(row=2, column=0, padx=5, pady=5)
+
+# ページ開始エントリ
+getCompanyCountStart = StringVar()
+getCompanyCountStart_txt = ttk.Entry(frame1, textvariable=getCompanyCountStart, width=10)
+getCompanyCountStart_txt.grid(row=1, column=1, padx=5, pady=5)
+
+# セパレーター
+separator = ttk.Label(frame1, text='~', anchor=CENTER, width=5)
+separator.grid(row=1, column=2, sticky=W+E, padx=5, pady=5)
+
+# ページ終了エントリ
+getCompanyCountEnd = StringVar()
+getCompanyCountEnd_txt = ttk.Entry(frame1, textvariable=getCompanyCountEnd, width=10)
+getCompanyCountEnd_txt.grid(row=1, column=3, padx=5, pady=5)
+
+# 開始ボタン
+def btn_click():
+    csv_value = str(OutputCSV.get())
+    select_value = str(radioSelect.get())
+
+    if select_value == 'A':
+        company_start = int(getCompanyCountStart.get())
+        company_end = int(getCompanyCountEnd.get())
+
+        # 呼びだし
+        app.getDataToCampfire(csv_pass=csv_value,company_start=company_start, company_end=company_end)
+    else:
+        company_all = True
+        app.getDataToCampfire(csv_pass=csv_value, company_all=company_all)
 
 
-# Button
-button1 = ttk.Button(
-    frame1, text='開始',
-    command=btn_click
-)
-button1.grid(row=4, column=1)
 
-
+button1 = ttk.Button(frame1, text='開始', command=btn_click)
+button1.grid(row=3, column=1, padx=5, pady=10)
 
 # ウィンドウ表示継続
 root.mainloop()
