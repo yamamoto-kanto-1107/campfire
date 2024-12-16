@@ -76,22 +76,22 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                     )
                     all = define.find_elements(By.CLASS_NAME, 'description')
                     if all[0].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
-                        company_arr.append('-')
+                        continue
                     else:
                         company_arr.append(all[0].text)
 
                     if all[2].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
-                        address_arr.append('-')
+                        continue
                     else:
                         address_arr.append(all[2].text)
 
                     if all[3].text ==  '無し':
-                        phone_arr.append('-')
+                        continue
                     else:
                         phone_arr.append(all[3].text)
 
                     if all[1].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
-                        name_arr.append('-')
+                        continue
                     else:
                         name_arr.append(all[1].text)
 
