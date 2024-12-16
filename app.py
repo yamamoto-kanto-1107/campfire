@@ -30,7 +30,7 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
 
     page=1
     count = 0
-    while True:
+    while page < 51:
         try:
             # 最新の `ol` 要素を取得
             container = driver.find_element(By.CLASS_NAME,'container')
@@ -39,9 +39,9 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
             # `li` 要素を取得
             company_element_li = company_elements.find_elements(By.TAG_NAME, 'li')
 
-            # for i in range(len(company_element_li)):
-            for i in range(1):
+            for i in range(len(company_element_li)):
                 count +=1
+                print(count)
                 try:
                     # `card` 要素を取得しクリック
                     container = driver.find_element(By.CLASS_NAME,'container')
@@ -53,8 +53,12 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                     company_element_btn.click()
 
                     # 識別ボタンをクリック
-                    identify_btn = driver.find_element(By.ID,'gtm-sct-button')
-                    identify_btn.click()
+                    try:
+                        identify_btn = driver.find_element(By.ID,'gtm-sct-button')
+                        identify_btn.click()
+                    except:
+                        driver.back()
+                        continue
 
                     # 定義部分を取得
                     define =driver.find_element(By.CLASS_NAME,'definitions')
@@ -68,7 +72,6 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                     else:
                         #電話番号の重複
                         if all[3].text in phone_arr:
-                            print('suc')
                             close_btn = driver.find_element(By.CLASS_NAME,'close')
                             close_btn.click()
                             driver.back()
@@ -108,6 +111,8 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
 
                 except Exception as e:
                     print(f"Error during interaction with item {e}")
+                    driver.back()
+
 
         except Exception as e:
             print(f"Error retrieving DOM: {e}")
