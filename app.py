@@ -39,8 +39,7 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
             # `li` 要素を取得
             company_element_li = company_elements.find_elements(By.TAG_NAME, 'li')
 
-            # for i in range(len(company_element_li)):
-            for i in range(1):
+            for i in range(len(company_element_li)):
                 count +=1
                 try:
                     # `card` 要素を取得しクリック
