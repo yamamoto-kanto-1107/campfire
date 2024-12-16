@@ -41,6 +41,7 @@ IDirButton.grid(row=0, column=3, padx=5, pady=5)
 radioSelect = StringVar()
 radioBtn = ttk.Radiobutton(frame1, text='ページ指定', variable=radioSelect, value='A', width=10)
 radioBtn2 = ttk.Radiobutton(frame1, text='全て', variable=radioSelect, value='B', width=10)
+radioSelect.set('A')
 radioBtn.grid(row=1, column=0, padx=5, pady=5)
 radioBtn2.grid(row=2, column=0, padx=5, pady=5)
 
