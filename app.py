@@ -65,6 +65,7 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                     all = define.find_elements(By.CLASS_NAME, 'description')
 
                     if all[3].text ==  '無し' or all[3].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
+                        print('no phone')
                         close_btn = driver.find_element(By.CLASS_NAME,'close')
                         close_btn.click()
                         driver.back()
@@ -72,6 +73,7 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                     else:
                         #電話番号の重複
                         if all[3].text in phone_arr:
+                            print('double phone')
                             close_btn = driver.find_element(By.CLASS_NAME,'close')
                             close_btn.click()
                             driver.back()
@@ -80,6 +82,7 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                             phone_arr.append(all[3].text)
 
                     if all[0].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
+                        print('no company')
                         close_btn = driver.find_element(By.CLASS_NAME,'close')
                         close_btn.click()
                         driver.back()
@@ -89,6 +92,7 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                         company_arr.append(all[0].text)
 
                     if all[2].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
+                        print('no address')
                         close_btn = driver.find_element(By.CLASS_NAME,'close')
                         close_btn.click()
                         driver.back()
@@ -97,6 +101,7 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                         address_arr.append(all[2].text)
 
                     if all[1].text ==  '請求があり次第提供します。メッセージ機能にてご連絡ください。':
+                        print('no name')
                         close_btn = driver.find_element(By.CLASS_NAME,'close')
                         close_btn.click()
                         driver.back()
