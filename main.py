@@ -96,7 +96,7 @@ def btn_click():
 
 
 button1 = ttk.Button(frame1, text='開始', command=btn_click)
-button1.grid(row=5, column=1, padx=5, pady=10)
+button1.grid(row=8, column=1, padx=5, pady=10)
 
 # ウィンドウ表示継続
 root.mainloop()
