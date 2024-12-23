@@ -6,14 +6,17 @@ from selenium.webdriver.support import expected_conditions as EC
 
 import time
 import csv
+import re
 
 
-def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all = None):
+def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all = None, category="all"):
 
     if company_start == None:
         company_start= 1
 
     url = f'https://camp-fire.jp/projects/search?project_status=closed&page={company_start}'
+    if category != 'all':
+        url = url + f'&category={category}'
 
     driver= webdriver.Chrome()
     driver.get(url)
@@ -51,6 +54,14 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                     company_element_li = company_elements.find_elements(By.TAG_NAME, 'li')
                     company_element_btn = company_element_li[i].find_element(By.CLASS_NAME, 'card')
                     company_element_btn.click()
+
+                    # 価格を取得
+                    priceElm = driver.find_element(By.CLASS_NAME, 'backer-amount')
+                    price = int(re.sub(r'\D', '', priceElm.text))
+                    if price > 1000000:
+                        print('over 1000000')
+                        driver.back()
+                        continue
 
                     # 識別ボタンをクリック
                     try:
@@ -108,6 +119,8 @@ def getDataToCampfire(csv_pass,company_start = None,company_end=None,company_all
                         continue
                     else:
                         name_arr.append(all[1].text)
+
+                    
 
                     current_url = driver.current_url
                     url_arr.append(current_url)
